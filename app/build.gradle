@@ -1,0 +1,103 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+    defaultConfig {
+        applicationId "com.threshold.xlog"
+        minSdkVersion 19
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_PLATFORM=android-19",
+//                        "-DANDROID_ARM_NEON=TRUE",
+                        "-DANDROID_TOOLCHAIN=clang"
+                cFlags "-g -Wall"
+// -Wreturn-type-c-linkage -Wpointer-arith -ftrapv -fsanitize=undefined-trap -fsanitize-undefined-trap-on-error
+//                cppFlags "-frtti -fexceptions -fpermissive -v"
+//                arguments "-DANDROID_STL=gnustl_static", "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-21", "-DANDROID_ARM_NEON=TRUE"
+                //-g -Wall -Wpointer-arith -ftrapv -fsanitize=undefined-trap -fsanitize-undefined-trap-on-error
+            }
+            ndk {
+                abiFilters 'armeabi-v7a'//'armeabi', 'arm64-v8a','x86','x86_64'//,'mips','mips64'
+            }
+        }
+
+    }
+
+
+    buildTypes {
+        debug {
+            externalNativeBuild {
+                cmake {
+//                    arguments += "-DWSMSC_BUILD_TYPE=DEBUG"
+                    cFlags += "-O0"
+                }
+                ndk {
+                    abiFilters 'armeabi-v7a'//,'arm64-v8a','x86','x86_64'//,'mips','mips64'
+                }
+            }
+            minifyEnabled false
+        }
+        release {
+            externalNativeBuild {
+                cmake {
+//                    arguments += "-DWSMSC_BUILD_TYPE=RELEASE"
+                    cFlags += "-Os"
+//                    targets "wsmsc"
+                }
+            }
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+        exclude 'META-INF/DEPENDENCIES.txt'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude "META-INF/MANIFEST.MF"
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LGPL2.1'
+        // do not strip .so file.
+        doNotStrip "**/*.so"
+    }
+
+    lintOptions {
+        abortOnError false
+        checkReleaseBuilds false
+        quiet true
+        ignoreWarnings true
+        disable 'MissingTranslation'
+        // Some libraries have issues with this.
+        disable 'InvalidPackage'
+        // Lint gives this warning but SDK 20 would be Android L Beta.
+        disable 'OldTargetApi'
+    }
+
+    compileOptions {
+        sourceCompatibility = 1.7
+        targetCompatibility = 1.7
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+}
