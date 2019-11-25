@@ -1,6 +1,10 @@
 #ifndef _XLOG_H
 #define _XLOG_H
 
+#if defined ( WIN32 )
+#define __func__ __FUNCTION__
+#endif
+
 #define LOG_LEVEL_VERBOSE (0)
 #define LOG_LEVEL_DEBUG (1)
 #define LOG_LEVEL_INFO (2)
