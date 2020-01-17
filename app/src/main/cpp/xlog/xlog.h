@@ -5,10 +5,7 @@
 extern "C" {
 #endif // __cplusplus
 
-
-#ifdef _MSC_VER
-#define __func__ __FUNCTION__
-#endif //_MSC_VER
+#include <stdio.h>
 
 #define LOG_LEVEL_VERBOSE (0)
 #define LOG_LEVEL_DEBUG (1)
@@ -26,16 +23,24 @@ extern int LOG_CONFIG_TARGET;
 
 #define LOG_LINE_STAR "****************************************************************"
 #define LOG_TAG_DEFAULT "XTest"
-
-#include <stdio.h>
-
 #define CONSOLE_LOG_CONFIG_METHOD printf
 
+//for MSC
 #ifdef _MSC_VER
 
+#include <windows.h>
+static long long time_stamp_current(){
+    SYSTEMTIME sys_time;
+    time_t ltime;
+    time(&ltime);
+    GetLocalTime(&sys_time);
+    return ltime * 1000 + sys_time.wMilliseconds;
+}
+
+#define __func__ __FUNCTION__
 #define CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT "\r\n"
 
-	//fix msvc macro comma. https://stackoverflow.com/questions/5588855/standard-alternative-to-gccs-va-args-trick
+    //fix MSC macro comma. https://stackoverflow.com/questions/5588855/standard-alternative-to-gccs-va-args-trick
 //#define BAR_HELPER(fmt, ...) printf(fmt "\n", __VA_ARGS__)
 //#define BAR(...) BAR_HELPER(__VA_ARGS__, 0)
 
@@ -47,11 +52,11 @@ extern int LOG_CONFIG_TARGET;
 #define CONSOLE_LOGI_NO_NEW_LINE(...) CONSOLE_LOG_NO_NEW_LINE(LOG_LEVEL_INFO,__VA_ARGS__)
 #define CONSOLE_LOGW_NO_NEW_LINE(...) CONSOLE_LOG_NO_NEW_LINE(LOG_LEVEL_WARN,__VA_ARGS__)
 #define CONSOLE_LOGE_NO_NEW_LINE(...) CONSOLE_LOG_NO_NEW_LINE(LOG_LEVEL_ERROR,__VA_ARGS__)
-#define CONSOLE_LOGV(fmt, ...) CONSOLE_LOG_NO_NEW_LINE(LOG_LEVEL_VERBOSE,fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT,__VA_ARGS__)
-#define CONSOLE_LOGD(fmt, ...) CONSOLE_LOG_NO_NEW_LINE(LOG_LEVEL_DEBUG,fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT,__VA_ARGS__)
-#define CONSOLE_LOGI(fmt, ...) CONSOLE_LOG_NO_NEW_LINE(LOG_LEVEL_INFO,fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT,__VA_ARGS__)
-#define CONSOLE_LOGW(fmt, ...) CONSOLE_LOG_NO_NEW_LINE(LOG_LEVEL_WARN,fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT,__VA_ARGS__)
-#define CONSOLE_LOGE(fmt, ...) CONSOLE_LOG_NO_NEW_LINE(LOG_LEVEL_ERROR,fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT,__VA_ARGS__)
+#define CONSOLE_LOGV(fmt, ...) CONSOLE_LOG_NO_NEW_LINE(LOG_LEVEL_VERBOSE,"[%lld][V]" fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT,time_stamp_current(),__VA_ARGS__)
+#define CONSOLE_LOGD(fmt, ...) CONSOLE_LOG_NO_NEW_LINE(LOG_LEVEL_DEBUG,"[%lld][D]" fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT,time_stamp_current(),__VA_ARGS__)
+#define CONSOLE_LOGI(fmt, ...) CONSOLE_LOG_NO_NEW_LINE(LOG_LEVEL_INFO,"[%lld][I]" fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT,time_stamp_current(),__VA_ARGS__)
+#define CONSOLE_LOGW(fmt, ...) CONSOLE_LOG_NO_NEW_LINE(LOG_LEVEL_WARN,"[%lld][W]" fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT,time_stamp_current(),__VA_ARGS__)
+#define CONSOLE_LOGE(fmt, ...) CONSOLE_LOG_NO_NEW_LINE(LOG_LEVEL_ERROR,"[%lld][E]" fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT,time_stamp_current(),__VA_ARGS__)
 #define CONSOLE_TLOGV(tag, fmt, ...)  CONSOLE_LOGV("[%s] " fmt, tag, ##__VA_ARGS__)
 #define CONSOLE_TLOGD(tag, fmt, ...)  CONSOLE_LOGD("[%s] " fmt, tag, ##__VA_ARGS__)
 #define CONSOLE_TLOGI(tag, fmt, ...)  CONSOLE_LOGI("[%s] " fmt, tag, ##__VA_ARGS__)
@@ -65,17 +70,25 @@ extern int LOG_CONFIG_TARGET;
 
 #else
 
+#include <sys/time.h>
+
+static long long time_stamp_current() {
+    struct timeval te;
+    gettimeofday(&te, NULL); // get current time
+    return te.tv_sec * 1000LL + te.tv_usec / 1000;
+}
+
 #define CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT "\n"
 #define CONSOLE_LOGV_NO_NEW_LINE(...) if(LOG_LEVEL_VERBOSE >= LOG_CONFIG_LEVEL ) { CONSOLE_LOG_CONFIG_METHOD(__VA_ARGS__); }
 #define CONSOLE_LOGD_NO_NEW_LINE(...) if(LOG_LEVEL_DEBUG >= LOG_CONFIG_LEVEL) { CONSOLE_LOG_CONFIG_METHOD(__VA_ARGS__); }
 #define CONSOLE_LOGI_NO_NEW_LINE(...) if(LOG_LEVEL_INFO >= LOG_CONFIG_LEVEL) { CONSOLE_LOG_CONFIG_METHOD(__VA_ARGS__); }
 #define CONSOLE_LOGW_NO_NEW_LINE(...) if(LOG_LEVEL_WARN >= LOG_CONFIG_LEVEL) { CONSOLE_LOG_CONFIG_METHOD(__VA_ARGS__); }
 #define CONSOLE_LOGE_NO_NEW_LINE(...) if(LOG_LEVEL_ERROR >= LOG_CONFIG_LEVEL) { CONSOLE_LOG_CONFIG_METHOD(__VA_ARGS__); }
-#define CONSOLE_LOGV(fmt, ...) CONSOLE_LOGV_NO_NEW_LINE(fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT, ##__VA_ARGS__)
-#define CONSOLE_LOGD(fmt, ...) CONSOLE_LOGD_NO_NEW_LINE(fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT, ##__VA_ARGS__)
-#define CONSOLE_LOGI(fmt, ...) CONSOLE_LOGI_NO_NEW_LINE(fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT, ##__VA_ARGS__)
-#define CONSOLE_LOGW(fmt, ...) CONSOLE_LOGW_NO_NEW_LINE(fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT, ##__VA_ARGS__)
-#define CONSOLE_LOGE(fmt, ...) CONSOLE_LOGE_NO_NEW_LINE(fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT, ##__VA_ARGS__)
+#define CONSOLE_LOGV(fmt, ...) CONSOLE_LOGV_NO_NEW_LINE("[%lld][V]" fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT, time_stamp_current(), ##__VA_ARGS__)
+#define CONSOLE_LOGD(fmt, ...) CONSOLE_LOGD_NO_NEW_LINE("[%lld][D]" fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT, time_stamp_current(), ##__VA_ARGS__)
+#define CONSOLE_LOGI(fmt, ...) CONSOLE_LOGI_NO_NEW_LINE("[%lld][I]" fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT, time_stamp_current(), ##__VA_ARGS__)
+#define CONSOLE_LOGW(fmt, ...) CONSOLE_LOGW_NO_NEW_LINE("[%lld][W]" fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT, time_stamp_current(), ##__VA_ARGS__)
+#define CONSOLE_LOGE(fmt, ...) CONSOLE_LOGE_NO_NEW_LINE("[%lld][E]" fmt CONSOLE_LOG_CONFIG_NEW_LINE_FORMAT, time_stamp_current(), ##__VA_ARGS__)
 #define CONSOLE_TLOGV(tag, fmt, ...)  CONSOLE_LOGV("[%s] " fmt, tag, ##__VA_ARGS__)
 #define CONSOLE_TLOGD(tag, fmt, ...)  CONSOLE_LOGD("[%s] " fmt, tag, ##__VA_ARGS__)
 #define CONSOLE_TLOGI(tag, fmt, ...)  CONSOLE_LOGI("[%s] " fmt, tag, ##__VA_ARGS__)
@@ -88,7 +101,6 @@ extern int LOG_CONFIG_TARGET;
 #define CONSOLE_TLOGE_TRACE(tag, fmt, ...)  CONSOLE_TLOGE(tag, "[%s:%d] " fmt, __func__, __LINE__, ##__VA_ARGS__)
 
 #endif // _MSC_VER
-
 
 
 #if defined(__ANDROID__)
@@ -155,7 +167,6 @@ extern int LOG_CONFIG_TARGET;
 #define A_LOGI_NO_NEW_LINE(...)
 #define A_LOGW_NO_NEW_LINE(...)
 #define A_LOGE_NO_NEW_LINE(...)
-
 
 #endif // defined(__ANDROID__)
 

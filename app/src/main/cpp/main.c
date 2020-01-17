@@ -1,5 +1,5 @@
 #include "xlog.h"
-#define LOG_TAG_MAIN "MAIN"
+#define LOG_TAG_MAIN "MY_TAG"
 
 int main(int argc, char *argv[]){
 
