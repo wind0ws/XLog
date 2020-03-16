@@ -193,11 +193,11 @@ static inline long long time_stamp_current() {
 #define A_LOGW(...)
 #define A_LOGE(...)
 
-#define A_LOGV_TRACE(TAG, fmt, ...)
-#define A_LOGD_TRACE(TAG, fmt, ...)
-#define A_LOGI_TRACE(TAG, fmt, ...)
-#define A_LOGW_TRACE(TAG, fmt, ...)
-#define A_LOGE_TRACE(TAG, fmt, ...)
+#define A_LOGV_TRACE(fmt, ...)
+#define A_LOGD_TRACE(fmt, ...)
+#define A_LOGI_TRACE(fmt, ...)
+#define A_LOGW_TRACE(fmt, ...)
+#define A_LOGE_TRACE(fmt, ...)
 
 #endif // defined(__ANDROID__)
 
